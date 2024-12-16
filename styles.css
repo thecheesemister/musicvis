@@ -1,38 +1,38 @@
+/* Ensure the body fills the entire viewport */
 body {
-  font-family: Arial, sans-serif;
-  text-align: center;
-  background: #121212;
-  color: white;
-  margin: 0;
-  padding: 0;
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: rainbowTransition 10s infinite;
+    background-color: black; /* Default background color before the rainbow animation */
 }
 
-h1 {
-  margin-top: 20px;
+/* Keyframes for the solid color rainbow transition */
+@keyframes rainbowTransition {
+    0% { background-color: red; }
+    16% { background-color: orange; }
+    33% { background-color: yellow; }
+    50% { background-color: green; }
+    66% { background-color: blue; }
+    83% { background-color: indigo; }
+    100% { background-color: violet; }
 }
 
-canvas {
-  display: block;
-  margin: 20px auto;
-  border: 2px solid white;
-  background: #222;
+/* Styling for the spinning image */
+.spinning-image {
+    width: 150px;
+    height: 150px;
+    animation: spin 5s linear infinite;
 }
 
-#songButtons {
-  margin-top: 20px;
-}
-
-button {
-  padding: 10px 20px;
-  font-size: 16px;
-  margin: 10px 5px;
-  background-color: #444;
-  color: white;
-  border: none;
-  cursor: pointer;
-  border-radius: 5px;
-}
-
-button:hover {
-  background-color: #666;
+/* Keyframes for the spinning effect */
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
 }
