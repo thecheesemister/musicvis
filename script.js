@@ -51,19 +51,35 @@ const adminPartyModeBtn = document.getElementById('admin-party-mode-btn');
 // Global State Variables
 let messagesListener = null;
 let configListener = null;
-let config = {}; // Holds global config like partyMode status
+let config = {}; 
 let currentUser = { uid: null, username: null, email: null };
 
 // =================================================================================
-// SECTION 3: CORE APP LOGIC (AUTH, ADMIN PANEL, ETC.)
+// SECTION 3: CORE APP LOGIC
 // =================================================================================
 
-// --- Auth Listeners ---
-signupButton.addEventListener('click', () => { /* No changes here */ });
-loginButton.addEventListener('click', () => { /* No changes here */ });
+// --- Event Listeners ---
+signupButton.addEventListener('click', () => {
+    const username = usernameInput.value;
+    const email = emailInput.value;
+    const password = passwordInput.value;
+    if (!username || !email || !password) return alert("Please fill out all fields.");
+    auth.createUserWithEmailAndPassword(email, password)
+        .then(cred => {
+            db.ref('users/' + cred.user.uid).set({ username: username, email: email, canChangeName: false });
+        })
+        .catch(err => alert(err.message));
+});
+
+loginButton.addEventListener('click', () => {
+    const email = emailInput.value;
+    const password = passwordInput.value;
+    if (!email || !password) return alert("Please enter email and password.");
+    auth.signInWithEmailAndPassword(email, password).catch(err => alert(err.message));
+});
+
 logoutButton.addEventListener('click', () => { auth.signOut(); });
 
-// --- Admin Panel Listeners ---
 adminPanelButton.addEventListener('click', () => adminPanel.classList.remove('hidden'));
 adminPanelCloseBtn.addEventListener('click', () => adminPanel.classList.add('hidden'));
 
@@ -72,14 +88,17 @@ adminClearChatBtn.addEventListener('click', () => {
         db.ref('messages').remove().then(() => alert("Chat cleared."));
     }
 });
+
 adminMuteUserBtn.addEventListener('click', () => {
     const userToMute = adminMuteUserInput.value.trim();
     if (userToMute) db.ref('config/mutedUsers/' + userToMute).set(true).then(() => alert(userToMute + " has been muted."));
 });
+
 adminUnmuteUserBtn.addEventListener('click', () => {
     const userToUnmute = adminUnmuteUserInput.value.trim();
     if (userToUnmute) db.ref('config/mutedUsers/' + userToUnmute).remove().then(() => alert(userToUnmute + " has been unmuted."));
 });
+
 adminViewMutedBtn.addEventListener('click', () => {
     db.ref('config/mutedUsers').once('value').then(snapshot => {
         if (snapshot.exists()) {
@@ -89,19 +108,23 @@ adminViewMutedBtn.addEventListener('click', () => {
         }
     });
 });
+
 adminBroadcastBtn.addEventListener('click', () => {
     const broadcastText = adminBroadcastInput.value.trim();
     if (broadcastText) {
         db.ref('messages').push({ sender: '[SYSTEM]', text: broadcastText, timestamp: firebase.database.ServerValue.TIMESTAMP });
     }
 });
+
 adminForceWordBtn.addEventListener('click', () => {
     const word = adminForceWordInput.value.trim();
     if (word) db.ref('config/forceWord').set(word).then(() => alert("All users will now say '" + word + "'"));
 });
+
 adminDisableForceWordBtn.addEventListener('click', () => {
     db.ref('config/forceWord').remove().then(() => alert("Force Word disabled."));
 });
+
 adminPartyModeBtn.addEventListener('click', () => {
     const newStatus = !config.partyMode;
     db.ref('config/partyMode').set(newStatus).then(() => alert("Party Mode is now " + (newStatus ? "ON" : "OFF")));
@@ -111,9 +134,16 @@ adminPartyModeBtn.addEventListener('click', () => {
 auth.onAuthStateChanged(user => {
     if (user) { // User is logged in
         currentUser = { uid: user.uid, email: user.email };
+        
+        // ---- THIS IS THE FIX ----
+        // Check if the user is an admin and show/hide the button accordingly.
         if (user.email === 'admin@gmail.com') {
-            adminPanelButton.classList.remove('hidden');
+            adminPanelButton.classList.remove('hidden'); // Show the button for admin
+        } else {
+            adminPanelButton.classList.add('hidden'); // Hide the button for everyone else
         }
+        // ---- END OF FIX ----
+
         listenForConfigChanges();
         db.ref('users/' + user.uid).once('value').then(snapshot => {
             if (snapshot.exists()) {
@@ -122,7 +152,13 @@ auth.onAuthStateChanged(user => {
                 chatPage.classList.remove('hidden');
                 userDisplayName.textContent = currentUser.username;
                 listenForMessages();
-                // Handle username change logic (no changes here)
+                // Username change logic remains the same
+                if (snapshot.val().canChangeName === true) {
+                    const newName = prompt("You have permission to change your username! Enter a new one.");
+                    if (newName && newName.trim() !== '') {
+                        db.ref('users/' + user.uid).update({ username: newName, canChangeName: false });
+                    }
+                }
             } else { auth.signOut(); }
         });
     } else { // User is logged out
@@ -143,7 +179,7 @@ auth.onAuthStateChanged(user => {
 function listenForConfigChanges() {
     const configRef = db.ref('config');
     configListener = configRef.on('value', snapshot => {
-        config = snapshot.val() || {}; // Update global config object
+        config = snapshot.val() || {};
     });
 }
 
@@ -151,11 +187,9 @@ sendButton.addEventListener('click', () => {
     let messageText = messageInput.value.trim();
     if (messageText === '' || !currentUser.username) return;
 
-    // Check for Mute
     if (config.mutedUsers && config.mutedUsers[currentUser.username]) {
         return alert("You are currently muted by an admin.");
     }
-    // Check for Force Word (admin is immune)
     if (config.forceWord && currentUser.email !== 'admin@gmail.com') {
         messageText = config.forceWord;
     }
@@ -176,7 +210,6 @@ function listenForMessages() {
         if (message.sender === currentUser.username) messageElement.classList.add('sent');
         else messageElement.classList.add('received');
         
-        // Apply special styles
         if (message.sender === '[SYSTEM]') messageElement.classList.add('system-message');
         if (config.partyMode) messageElement.classList.add('party-message');
         
@@ -190,7 +223,3 @@ function listenForMessages() {
         chatContainer.scrollTop = chatContainer.scrollHeight;
     });
 }
-
-// Dummy signup/login functions for completeness
-signupButton.addEventListener('click', () => { const u = usernameInput.value, e = emailInput.value, p = passwordInput.value; if (!u || !e || !p) return; auth.createUserWithEmailAndPassword(e, p).then(cred => db.ref('users/' + cred.user.uid).set({username: u, email: e, canChangeName: false}))});
-loginButton.addEventListener('click', () => { const e = emailInput.value, p = passwordInput.value; if (!e || !p) return; auth.signInWithEmailAndPassword(e, p).catch(err => alert(err.message)) });
