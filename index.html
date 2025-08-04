@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- Login Screen -->
+    <!-- Login Screen (no changes) -->
     <div id="login-page">
         <h1>My Chat App</h1>
         <div class="form">
@@ -19,10 +19,11 @@
         </div>
     </div>
 
-    <!-- Chat Screen (Starts hidden) -->
+    <!-- Chat Screen -->
     <div id="chat-page" class="hidden">
         <div id="header">
             <p>Welcome, <span id="user-display-name"></span>!</p>
+            <!-- NEW! This button opens the admin panel -->
             <button id="admin-panel-button" class="hidden">Admin Panel</button>
             <button id="logout-button">Logout</button>
         </div>
@@ -33,14 +34,14 @@
         </div>
     </div>
 
-    <!-- Admin Panel (This MUST start hidden) -->
+    <!-- NEW! The entire Admin Panel structure. It's hidden by default. -->
     <div id="admin-panel" class="hidden">
         <div class="admin-panel-content">
             <span id="admin-panel-close-btn" class="close-btn">×</span>
             <h2>Admin Commands</h2>
             
             <div class="admin-command-group">
-                <h3>Moderation</h3>
+                <h3>Functional</h3>
                 <button id="admin-clear-chat-btn">Clear All Chat</button>
                 <div class="admin-input-group">
                     <input type="text" id="admin-mute-user-input" placeholder="Username to mute">
@@ -51,31 +52,14 @@
                     <button id="admin-unmute-user-btn">Unmute User</button>
                 </div>
                 <button id="admin-view-muted-btn">View Muted Users</button>
-            </div>
-
-            <div class="admin-command-group">
-                <h3>Ban Management</h3>
-                <div class="admin-input-group">
-                    <input type="email" id="admin-ban-email-input" placeholder="User's email to ban">
-                </div>
-                <div class="admin-input-group">
-                    <input type="number" id="admin-ban-duration-input" placeholder="Duration in hours">
-                    <input type="text" id="admin-ban-reason-input" placeholder="Reason for ban">
-                </div>
-                <button id="admin-ban-btn">Ban User</button>
-                <div class="admin-input-group">
-                     <input type="email" id="admin-unban-email-input" placeholder="User's email to unban">
-                     <button id="admin-unban-btn">Unban User</button>
-                </div>
-                <button id="admin-view-bans-btn">View Banned Users</button>
-            </div>
-
-            <div class="admin-command-group">
-                <h3>System & Fun</h3>
-                <div class="admin-input-group">
+                 <div class="admin-input-group">
                     <input type="text" id="admin-broadcast-input" placeholder="System message">
                     <button id="admin-broadcast-btn">Broadcast</button>
                 </div>
+            </div>
+
+            <div class="admin-command-group">
+                <h3>Fun</h3>
                 <div class="admin-input-group">
                     <input type="text" id="admin-force-word-input" placeholder="Word to force">
                     <button id="admin-force-word-btn">Force Word</button>
@@ -86,7 +70,7 @@
         </div>
     </div>
 
-    <!-- Firebase Scripts -->
+    <!-- Firebase Scripts (no changes) -->
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-database.js"></script>
