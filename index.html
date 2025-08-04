@@ -8,10 +8,11 @@
 </head>
 <body>
 
-    <!-- This is the login screen. It's hidden when you're logged in. -->
     <div id="login-page">
         <h1>My Chat App</h1>
         <div class="form">
+            <!-- NEW! Username input field. -->
+            <input type="text" id="username-input" placeholder="Choose a Username (on sign up)">
             <input type="email" id="email-input" placeholder="Email">
             <input type="password" id="password-input" placeholder="Password">
             <button id="login-button">Login</button>
@@ -19,16 +20,14 @@
         </div>
     </div>
 
-    <!-- This is the main chat screen. It's hidden until you log in. -->
     <div id="chat-page" class="hidden">
         <div id="header">
-            <p>Welcome! <span id="user-email"></span></p>
+            <!-- CHANGED! This will now show the username. -->
+            <p>Welcome, <span id="user-display-name"></span>!</p>
             <button id="logout-button">Logout</button>
         </div>
         
-        <div id="chat-container">
-            <!-- Messages will appear here -->
-        </div>
+        <div id="chat-container"></div>
 
         <div id="message-form">
             <input type="text" id="message-input" placeholder="Type a message...">
@@ -36,12 +35,10 @@
         </div>
     </div>
 
-    <!-- We link to the Firebase scripts here -->
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-database.js"></script>
     
-    <!-- This links to our JavaScript file where all the logic is -->
     <script src="script.js"></script>
 
 </body>
