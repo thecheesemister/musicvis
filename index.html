@@ -19,7 +19,7 @@
         </div>
     </div>
 
-    <!-- Chat Screen -->
+    <!-- Chat Screen (Starts hidden) -->
     <div id="chat-page" class="hidden">
         <div id="header">
             <p>Welcome, <span id="user-display-name"></span>!</p>
@@ -33,7 +33,7 @@
         </div>
     </div>
 
-    <!-- Admin Panel -->
+    <!-- Admin Panel (This MUST start with class="hidden") -->
     <div id="admin-panel" class="hidden">
         <div class="admin-panel-content">
             <span id="admin-panel-close-btn" class="close-btn">×</span>
@@ -53,7 +53,6 @@
                 <button id="admin-view-muted-btn">View Muted Users</button>
             </div>
 
-            <!-- NEW! Ban Management Section -->
             <div class="admin-command-group">
                 <h3>Ban Management</h3>
                 <div class="admin-input-group">
