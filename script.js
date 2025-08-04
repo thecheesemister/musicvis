@@ -32,15 +32,18 @@ const messageInput = document.getElementById('message-input');
 const sendButton = document.getElementById('send-button');
 const chatContainer = document.getElementById('chat-container');
 
+// NEW! Get the admin button.
+const adminClearButton = document.getElementById('admin-clear-button');
+
 let messagesListener = null;
 let currentUser = {
     uid: null,
     username: null,
-    email: null // NEW! We will store the email here for easy access.
+    email: null
 };
 
 // =================================================================================
-// SECTION 3: AUTHENTICATION LOGIC
+// SECTION 3: AUTHENTICATION & ADMIN LOGIC
 // =================================================================================
 
 signupButton.addEventListener('click', () => {
@@ -76,10 +79,28 @@ loginButton.addEventListener('click', () => {
 
 logoutButton.addEventListener('click', () => { auth.signOut(); });
 
+// NEW! Logic for the admin clear button.
+adminClearButton.addEventListener('click', () => {
+    const confirmClear = confirm("ADMIN ACTION: Are you sure you want to delete all messages forever?");
+    if (confirmClear) {
+        db.ref('messages').remove()
+            .then(() => { alert("Chat cleared successfully."); })
+            .catch(error => { alert("Error clearing chat: " + error.message); });
+    }
+});
+
+
+// This function now controls showing/hiding the admin button.
 auth.onAuthStateChanged(user => {
     if (user) {
         currentUser.uid = user.uid;
-        currentUser.email = user.email; // NEW! Store the user's email.
+        currentUser.email = user.email;
+        
+        // NEW! Check if the logged-in user is the admin.
+        if (currentUser.email === 'admin@gmail.com') {
+            adminClearButton.classList.remove('hidden'); // Show the button.
+        }
+
         db.ref('users/' + user.uid).once('value').then(snapshot => {
             if (snapshot.exists()) {
                 const userData = snapshot.val();
@@ -107,7 +128,8 @@ auth.onAuthStateChanged(user => {
     } else {
         loginPage.classList.remove('hidden');
         chatPage.classList.add('hidden');
-        currentUser = { uid: null, username: null, email: null }; // Clear all user data on logout.
+        adminClearButton.classList.add('hidden'); // IMPORTANT: Hide the button on logout.
+        currentUser = { uid: null, username: null, email: null };
         if (messagesListener) {
             db.ref('messages').off('child_added', messagesListener);
         }
@@ -118,31 +140,9 @@ auth.onAuthStateChanged(user => {
 // SECTION 4: REALTIME DATABASE LOGIC (CHAT)
 // =================================================================================
 
-// THIS FUNCTION CONTAINS THE CHANGES
+// CHANGED! The old "?clear" command logic has been completely removed from here.
 sendButton.addEventListener('click', () => {
     const messageText = messageInput.value;
-
-    // --- NEW! ADMIN COMMAND LOGIC ---
-    // First, check if the user is the admin and the message is the clear command.
-    if (currentUser.email === 'deetznuts642@gmail.com' && messageText.trim() === '?clear') {
-        const confirmClear = confirm("Are you sure you want to delete all messages forever?");
-        if (confirmClear) {
-            // Get a reference to all messages and remove them.
-            db.ref('messages').remove()
-                .then(() => {
-                    alert("Chat cleared successfully.");
-                })
-                .catch(error => {
-                    alert("Error clearing chat: " + error.message);
-                });
-        }
-        messageInput.value = ''; // Clear the input box.
-        return; // Stop the function here so the "?clear" message isn't posted.
-    }
-    // --- END OF ADMIN COMMAND LOGIC ---
-
-
-    // If it's not an admin command, proceed with normal message sending.
     if (messageText.trim() === '' || !currentUser.username) { return; }
     
     const message = {
