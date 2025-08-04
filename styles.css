@@ -11,21 +11,22 @@ button:hover { background-color: #0056b3; }
 #header { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; background-color: #007bff; color: white; }
 #header p { margin: 0; }
 #logout-button { background-color: transparent; border: 1px solid white; }
-#chat-container { padding: 20px; height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-.message { padding: 8px 12px; border-radius: 18px; max-width: 70%; word-wrap: break-word; }
-.message.sent { background-color: #007bff; color: white; align-self: flex-end; }
-.message.received { background-color: #e9e9eb; color: black; align-self: flex-start; }
 #message-form { display: flex; padding: 10px; border-top: 1px solid #ddd; }
 #message-input { flex-grow: 1; border-right: none; border-radius: 20px 0 0 20px; }
 #send-button { border-radius: 0 20px 20px 0; }
 
-/* --- NEW STYLE FOR THE USERNAME --- */
-.message-username {
-    font-weight: bold;
-    color: #555; /* A dark grey color for the username */
-    margin-right: 6px; /* Adds a little space after the colon */
+/* NEW! Style for the admin button */
+#admin-clear-button {
+    background-color: #dc3545; /* A bootstrap 'danger' red */
+    margin: 0 10px;
 }
-/* This makes the username white on your sent messages for better contrast */
-.message.sent .message-username {
-    color: white;
+#admin-clear-button:hover {
+    background-color: #c82333;
 }
+
+#chat-container { padding: 20px; height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+.message { padding: 8px 12px; border-radius: 18px; max-width: 70%; word-wrap: break-word; }
+.message.sent { background-color: #007bff; color: white; align-self: flex-end; }
+.message.received { background-color: #e9e9eb; color: black; align-self: flex-start; }
+.message-username { font-weight: bold; color: #555; margin-right: 6px; }
+.message.sent .message-username { color: white; }
