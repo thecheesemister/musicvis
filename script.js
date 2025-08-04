@@ -15,31 +15,31 @@ const adminBanEmailInput = document.getElementById('admin-ban-email-input'), adm
 
 let messagesListener = null, configListener = null, config = {}, currentUser = { uid: null, username: null, email: null };
 
+// --- THIS IS THE FIX ---
+// Failsafe: Ensure the admin panel is hidden when the script first loads.
+adminPanel.classList.add('hidden');
+
 // =================================================================================
 // SECTION 3: CORE APP LOGIC
 // =================================================================================
 signupButton.addEventListener('click', () => { const u = usernameInput.value, e = emailInput.value, p = passwordInput.value; if (!u || !e || !p) return; auth.createUserWithEmailAndPassword(e, p).then(cred => db.ref('users/' + cred.user.uid).set({username: u, email: e, canChangeName: false})).catch(err => alert(err.message))});
 logoutButton.addEventListener('click', () => auth.signOut());
 
-// --- THIS IS THE CRITICAL BAN ENFORCEMENT ---
 loginButton.addEventListener('click', () => {
     const email = emailInput.value, password = passwordInput.value;
     if (!email || !password) return;
     auth.signInWithEmailAndPassword(email, password)
         .then(userCredential => {
             const user = userCredential.user;
-            // After successful auth, CHECK FOR BAN before proceeding.
             const banRef = db.ref('bans/' + user.uid);
             banRef.once('value').then(snapshot => {
                 if (snapshot.exists()) {
                     const banInfo = snapshot.val();
                     if (Date.now() < banInfo.banUntil) {
-                        // User is actively banned.
                         const expiryDate = new Date(banInfo.banUntil).toLocaleString();
                         alert(`You are banned!\nReason: ${banInfo.reason}\nYour ban expires on: ${expiryDate}`);
-                        auth.signOut(); // Immediately sign them out.
+                        auth.signOut();
                     } else {
-                        // Ban has expired, remove it.
                         banRef.remove();
                     }
                 }
@@ -48,10 +48,9 @@ loginButton.addEventListener('click', () => {
         .catch(error => alert("Login Failed! Reason: " + error.message));
 });
 
-// --- Admin Panel Listeners ---
+// Admin Panel Listeners
 adminPanelButton.addEventListener('click', () => adminPanel.classList.remove('hidden'));
 adminPanelCloseBtn.addEventListener('click', () => adminPanel.classList.add('hidden'));
-// (Other admin buttons remain the same)
 adminClearChatBtn.addEventListener('click', () => { if (confirm("ADMIN: Sure you want to delete all messages?")) db.ref('messages').remove().then(() => alert("Chat cleared."))});
 adminMuteUserBtn.addEventListener('click', () => { const u = adminMuteUserInput.value.trim(); if (u) db.ref('config/mutedUsers/' + u).set(true).then(() => alert(u + " muted.")) });
 adminUnmuteUserBtn.addEventListener('click', () => { const u = adminUnmuteUserInput.value.trim(); if (u) db.ref('config/mutedUsers/' + u).remove().then(() => alert(u + " unmuted."))});
@@ -61,7 +60,6 @@ adminForceWordBtn.addEventListener('click', () => { const w = adminForceWordInpu
 adminDisableForceWordBtn.addEventListener('click', () => db.ref('config/forceWord').remove().then(() => alert("Force Word disabled.")));
 adminPartyModeBtn.addEventListener('click', () => { const n = !config.partyMode; db.ref('config/partyMode').set(n).then(() => alert("Party Mode: " + (n?"ON":"OFF")))});
 
-// --- NEW Ban Management Listeners ---
 const findUserByEmail = (email, callback) => {
     db.ref('users').orderByChild('email').equalTo(email).once('value').then(snapshot => {
         if (snapshot.exists()) {
@@ -110,9 +108,8 @@ adminViewBansBtn.addEventListener('click', () => {
     });
 });
 
-// --- Auth State Change Function ---
 auth.onAuthStateChanged(user => {
-    if (user) { // User is logged in
+    if (user) {
         currentUser = { uid: user.uid, email: user.email };
         if (user.email === 'admin@gmail.com') adminPanelButton.classList.remove('hidden');
         listenForConfigChanges();
@@ -122,10 +119,9 @@ auth.onAuthStateChanged(user => {
                 loginPage.classList.add('hidden'); chatPage.classList.remove('hidden');
                 userDisplayName.textContent = currentUser.username;
                 listenForMessages();
-                // Username change logic (unchanged)
             } else { auth.signOut(); }
         });
-    } else { // User is logged out
+    } else {
         loginPage.classList.remove('hidden'); chatPage.classList.add('hidden');
         adminPanelButton.classList.add('hidden'); adminPanel.classList.add('hidden');
         currentUser = { uid: null, username: null, email: null };
