@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Chat App</title>
-    <!-- CHANGED! This now points to your 'styles.css' file. -->
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -21,6 +20,8 @@
     <div id="chat-page" class="hidden">
         <div id="header">
             <p>Welcome, <span id="user-display-name"></span>!</p>
+            <!-- NEW! This is the admin button. It's hidden by default. -->
+            <button id="admin-clear-button" class="hidden">Clear Chat</button>
             <button id="logout-button">Logout</button>
         </div>
         <div id="chat-container"></div>
