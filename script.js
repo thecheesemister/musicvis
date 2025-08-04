@@ -35,7 +35,8 @@ const chatContainer = document.getElementById('chat-container');
 let messagesListener = null;
 let currentUser = {
     uid: null,
-    username: null
+    username: null,
+    email: null // NEW! We will store the email here for easy access.
 };
 
 // =================================================================================
@@ -78,6 +79,7 @@ logoutButton.addEventListener('click', () => { auth.signOut(); });
 auth.onAuthStateChanged(user => {
     if (user) {
         currentUser.uid = user.uid;
+        currentUser.email = user.email; // NEW! Store the user's email.
         db.ref('users/' + user.uid).once('value').then(snapshot => {
             if (snapshot.exists()) {
                 const userData = snapshot.val();
@@ -105,7 +107,7 @@ auth.onAuthStateChanged(user => {
     } else {
         loginPage.classList.remove('hidden');
         chatPage.classList.add('hidden');
-        currentUser = { uid: null, username: null };
+        currentUser = { uid: null, username: null, email: null }; // Clear all user data on logout.
         if (messagesListener) {
             db.ref('messages').off('child_added', messagesListener);
         }
@@ -116,19 +118,43 @@ auth.onAuthStateChanged(user => {
 // SECTION 4: REALTIME DATABASE LOGIC (CHAT)
 // =================================================================================
 
+// THIS FUNCTION CONTAINS THE CHANGES
 sendButton.addEventListener('click', () => {
     const messageText = messageInput.value;
+
+    // --- NEW! ADMIN COMMAND LOGIC ---
+    // First, check if the user is the admin and the message is the clear command.
+    if (currentUser.email === 'deetznuts642@gmail.com' && messageText.trim() === '?clear') {
+        const confirmClear = confirm("Are you sure you want to delete all messages forever?");
+        if (confirmClear) {
+            // Get a reference to all messages and remove them.
+            db.ref('messages').remove()
+                .then(() => {
+                    alert("Chat cleared successfully.");
+                })
+                .catch(error => {
+                    alert("Error clearing chat: " + error.message);
+                });
+        }
+        messageInput.value = ''; // Clear the input box.
+        return; // Stop the function here so the "?clear" message isn't posted.
+    }
+    // --- END OF ADMIN COMMAND LOGIC ---
+
+
+    // If it's not an admin command, proceed with normal message sending.
     if (messageText.trim() === '' || !currentUser.username) { return; }
+    
     const message = {
         sender: currentUser.username,
         text: messageText,
         timestamp: firebase.database.ServerValue.TIMESTAMP
     };
+
     db.ref('messages').push(message).catch(error => { alert("Could not send message! Reason: " + error.message); });
     messageInput.value = '';
 });
 
-// THIS FUNCTION CONTAINS THE CHANGES
 function listenForMessages() {
     chatContainer.innerHTML = '';
     const messagesRef = db.ref('messages').orderByChild('timestamp').limitToLast(100);
@@ -138,23 +164,18 @@ function listenForMessages() {
         const messageElement = document.createElement('div');
         messageElement.classList.add('message');
         
-        // This sets the message bubble to the right (sent) or left (received)
         if (message.sender === currentUser.username) {
             messageElement.classList.add('sent');
         } else {
             messageElement.classList.add('received');
         }
 
-        // --- NEW FORMATTING LOGIC ---
-        // Create a SPAN for the username so we can style it separately
         const usernameSpan = document.createElement('span');
         usernameSpan.classList.add('message-username');
-        usernameSpan.textContent = message.sender + ":"; // Add the colon here
+        usernameSpan.textContent = message.sender + ":";
         
-        // Create a text node for the actual message content
-        const messageTextNode = document.createTextNode(" " + message.text); // Add a space before the text
+        const messageTextNode = document.createTextNode(" " + message.text);
 
-        // Put them both inside the message bubble
         messageElement.appendChild(usernameSpan);
         messageElement.appendChild(messageTextNode);
         
