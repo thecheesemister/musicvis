@@ -3,17 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solid Rainbow Transition with Spinning Image and Music</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>My Chat App</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Spinning Image -->
-    <img src="NOOOO.gif" alt="Spinning Image" class="spinning-image">
 
-    <!-- Audio Player, plays Carousel.mp3 -->
-    <audio autoplay loop>
-        <source src="Carousel.mp3" type="audio/mp3">
-        Your browser does not support the audio element.
-    </audio>
+    <!-- This is the login screen. It's hidden when you're logged in. -->
+    <div id="login-page">
+        <h1>My Chat App</h1>
+        <div class="form">
+            <input type="email" id="email-input" placeholder="Email">
+            <input type="password" id="password-input" placeholder="Password">
+            <button id="login-button">Login</button>
+            <button id="signup-button">Sign Up</button>
+        </div>
+    </div>
+
+    <!-- This is the main chat screen. It's hidden until you log in. -->
+    <div id="chat-page" class="hidden">
+        <div id="header">
+            <p>Welcome! <span id="user-email"></span></p>
+            <button id="logout-button">Logout</button>
+        </div>
+        
+        <div id="chat-container">
+            <!-- Messages will appear here -->
+        </div>
+
+        <div id="message-form">
+            <input type="text" id="message-input" placeholder="Type a message...">
+            <button id="send-button">Send</button>
+        </div>
+    </div>
+
+    <!-- We link to the Firebase scripts here -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-database.js"></script>
+    
+    <!-- This links to our JavaScript file where all the logic is -->
+    <script src="script.js"></script>
+
 </body>
 </html>
