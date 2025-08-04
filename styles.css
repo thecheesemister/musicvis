@@ -15,7 +15,17 @@ button:hover { background-color: #0056b3; }
 .message { padding: 8px 12px; border-radius: 18px; max-width: 70%; word-wrap: break-word; }
 .message.sent { background-color: #007bff; color: white; align-self: flex-end; }
 .message.received { background-color: #e9e9eb; color: black; align-self: flex-start; }
-.message-sender { font-size: 12px; color: #666; margin-bottom: 4px; }
 #message-form { display: flex; padding: 10px; border-top: 1px solid #ddd; }
 #message-input { flex-grow: 1; border-right: none; border-radius: 20px 0 0 20px; }
 #send-button { border-radius: 0 20px 20px 0; }
+
+/* --- NEW STYLE FOR THE USERNAME --- */
+.message-username {
+    font-weight: bold;
+    color: #555; /* A dark grey color for the username */
+    margin-right: 6px; /* Adds a little space after the colon */
+}
+/* This makes the username white on your sent messages for better contrast */
+.message.sent .message-username {
+    color: white;
+}
