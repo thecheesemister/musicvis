@@ -1,6 +1,6 @@
 body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f4f4f8; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }
 #login-page, #chat-page { width: 100%; max-width: 400px; background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); overflow: hidden; }
-h1 { text-align: center; color: #333; }
+h1, h2 { text-align: center; color: #333; }
 .form { padding: 20px; display: flex; flex-direction: column; gap: 15px; }
 input { padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; }
 button { padding: 12px; border: none; border-radius: 4px; background-color: #007bff; color: white; font-size: 16px; cursor: pointer; transition: background-color 0.2s; }
@@ -14,19 +14,30 @@ button:hover { background-color: #0056b3; }
 #message-form { display: flex; padding: 10px; border-top: 1px solid #ddd; }
 #message-input { flex-grow: 1; border-right: none; border-radius: 20px 0 0 20px; }
 #send-button { border-radius: 0 20px 20px 0; }
-
-/* NEW! Style for the admin button */
-#admin-clear-button {
-    background-color: #dc3545; /* A bootstrap 'danger' red */
-    margin: 0 10px;
-}
-#admin-clear-button:hover {
-    background-color: #c82333;
-}
-
 #chat-container { padding: 20px; height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
 .message { padding: 8px 12px; border-radius: 18px; max-width: 70%; word-wrap: break-word; }
 .message.sent { background-color: #007bff; color: white; align-self: flex-end; }
 .message.received { background-color: #e9e9eb; color: black; align-self: flex-start; }
 .message-username { font-weight: bold; color: #555; margin-right: 6px; }
 .message.sent .message-username { color: white; }
+
+/* --- NEW ADMIN PANEL STYLES --- */
+#admin-panel-button { background-color: #ffc107; color: black; margin: 0 10px; }
+#admin-panel { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 100; display: flex; justify-content: center; align-items: center; }
+.admin-panel-content { background: white; padding: 20px; border-radius: 8px; width: 90%; max-width: 500px; position: relative; }
+.close-btn { position: absolute; top: 10px; right: 20px; font-size: 28px; font-weight: bold; cursor: pointer; }
+.admin-command-group { margin-bottom: 20px; border-top: 1px solid #eee; padding-top: 10px; }
+.admin-input-group { display: flex; margin: 10px 0; }
+.admin-input-group input { flex-grow: 1; border-right: none; border-radius: 4px 0 0 4px; }
+.admin-input-group button { border-radius: 0 4px 4px 0; }
+.admin-command-group button { width: 100%; margin-top: 5px; }
+#admin-clear-chat-btn, #admin-mute-user-btn { background-color: #dc3545; } /* Red for danger */
+#admin-unmute-user-btn, #admin-broadcast-btn { background-color: #17a2b8; } /* Blue for info */
+#admin-force-word-btn, #admin-party-mode-btn { background-color: #28a745; } /* Green for fun */
+
+/* --- NEW MESSAGE EFFECT STYLES --- */
+.system-message { background-color: #ffc107 !important; color: black !important; align-self: center !important; }
+.party-message { animation: party-colors 1s infinite; }
+@keyframes party-colors {
+    0% { background-color: #ff4d4d; } 25% { background-color: #4dffff; } 50% { background-color: #4dff4d; } 75% { background-color: #ffff4d; } 100% { background-color: #ff4dff; }
+}
