@@ -20,8 +20,6 @@ button:hover { background-color: #0056b3; }
 .message.received { background-color: #e9e9eb; color: black; align-self: flex-start; }
 .message-username { font-weight: bold; color: #555; margin-right: 6px; }
 .message.sent .message-username { color: white; }
-
-/* --- ADMIN PANEL STYLES --- */
 #admin-panel-button { background-color: #ffc107; color: black; margin: 0 10px; }
 #admin-panel { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 100; display: flex; justify-content: center; align-items: center; }
 .admin-panel-content { background: white; padding: 20px; border-radius: 8px; width: 90%; max-width: 500px; position: relative; }
@@ -31,12 +29,10 @@ button:hover { background-color: #0056b3; }
 .admin-input-group input { flex-grow: 1; border-right: none; border-radius: 4px; }
 .admin-input-group button { border-radius: 4px; }
 .admin-command-group button { width: 100%; margin-top: 5px; }
-#admin-clear-chat-btn, #admin-mute-user-btn, #admin-ban-btn { background-color: #dc3545; } /* Red */
-#admin-unmute-user-btn, #admin-broadcast-btn, #admin-unban-btn { background-color: #17a2b8; } /* Blue */
-#admin-force-word-btn, #admin-party-mode-btn { background-color: #28a745; } /* Green */
-#admin-view-bans-btn, #admin-view-muted-btn { background-color: #6c757d; } /* Grey */
-
-/* --- MESSAGE EFFECT STYLES --- */
+#admin-clear-chat-btn, #admin-mute-user-btn, #admin-ban-btn { background-color: #dc3545; }
+#admin-unmute-user-btn, #admin-broadcast-btn, #admin-unban-btn { background-color: #17a2b8; }
+#admin-force-word-btn, #admin-party-mode-btn { background-color: #28a745; }
+#admin-view-bans-btn, #admin-view-muted-btn { background-color: #6c757d; }
 .system-message { background-color: #ffc107 !important; color: black !important; align-self: center !important; }
 .party-message { animation: party-colors 1s infinite; }
 @keyframes party-colors { 0% { background-color: #ff4d4d; } 25% { background-color: #4dffff; } 50% { background-color: #4dff4d; } 75% { background-color: #ffff4d; } 100% { background-color: #ff4dff; } }
