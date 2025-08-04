@@ -15,9 +15,20 @@ const adminBanEmailInput = document.getElementById('admin-ban-email-input'), adm
 
 let messagesListener = null, configListener = null, config = {}, currentUser = { uid: null, username: null, email: null };
 
-// --- THIS IS THE FIX ---
-// Failsafe: Ensure the admin panel is hidden when the script first loads.
-adminPanel.classList.add('hidden');
+// --- THIS IS THE NEW, BULLETPROOF FIX ---
+// This function forces the UI into the correct starting state.
+function resetUIState(isLoggedIn) {
+    if (isLoggedIn) {
+        loginPage.classList.add('hidden');
+        chatPage.classList.remove('hidden');
+    } else {
+        loginPage.classList.remove('hidden');
+        chatPage.classList.add('hidden');
+    }
+    // Always hide the admin panel and button initially. They will be shown later if the user is an admin.
+    adminPanel.classList.add('hidden');
+    adminPanelButton.classList.add('hidden');
+}
 
 // =================================================================================
 // SECTION 3: CORE APP LOGIC
@@ -39,18 +50,18 @@ loginButton.addEventListener('click', () => {
                         const expiryDate = new Date(banInfo.banUntil).toLocaleString();
                         alert(`You are banned!\nReason: ${banInfo.reason}\nYour ban expires on: ${expiryDate}`);
                         auth.signOut();
-                    } else {
-                        banRef.remove();
-                    }
+                    } else { banRef.remove(); }
                 }
             });
         })
         .catch(error => alert("Login Failed! Reason: " + error.message));
 });
 
-// Admin Panel Listeners
+// Admin Panel Listeners (No changes here)
 adminPanelButton.addEventListener('click', () => adminPanel.classList.remove('hidden'));
 adminPanelCloseBtn.addEventListener('click', () => adminPanel.classList.add('hidden'));
+// ... (all other admin button event listeners are the same)
+const findUserByEmail = (email, callback) => { db.ref('users').orderByChild('email').equalTo(email).once('value').then(s => { if(s.exists()){ const uid = Object.keys(s.val())[0]; callback(uid); } else { alert("User not found."); callback(null); }})};
 adminClearChatBtn.addEventListener('click', () => { if (confirm("ADMIN: Sure you want to delete all messages?")) db.ref('messages').remove().then(() => alert("Chat cleared."))});
 adminMuteUserBtn.addEventListener('click', () => { const u = adminMuteUserInput.value.trim(); if (u) db.ref('config/mutedUsers/' + u).set(true).then(() => alert(u + " muted.")) });
 adminUnmuteUserBtn.addEventListener('click', () => { const u = adminUnmuteUserInput.value.trim(); if (u) db.ref('config/mutedUsers/' + u).remove().then(() => alert(u + " unmuted."))});
@@ -59,80 +70,37 @@ adminBroadcastBtn.addEventListener('click', () => { const b = adminBroadcastInpu
 adminForceWordBtn.addEventListener('click', () => { const w = adminForceWordInput.value.trim(); if (w) db.ref('config/forceWord').set(w).then(() => alert("Forcing word: " + w))});
 adminDisableForceWordBtn.addEventListener('click', () => db.ref('config/forceWord').remove().then(() => alert("Force Word disabled.")));
 adminPartyModeBtn.addEventListener('click', () => { const n = !config.partyMode; db.ref('config/partyMode').set(n).then(() => alert("Party Mode: " + (n?"ON":"OFF")))});
+adminBanBtn.addEventListener('click', () => { const e=adminBanEmailInput.value.trim(),d=parseFloat(adminBanDurationInput.value),r=adminBanReasonInput.value.trim()||"No reason."; if(!e||isNaN(d)||d<=0)return alert("Invalid email or duration."); findUserByEmail(e,uid=>{if(uid){const u=Date.now()+(d*36e5);db.ref('bans/'+uid).set({email:e,reason:r,banUntil:u,bannedBy:currentUser.email}).then(()=>alert(`${e} banned.`))}}) });
+adminUnbanBtn.addEventListener('click', () => { const e=adminUnbanEmailInput.value.trim(); if(!e)return; findUserByEmail(e,uid=>{if(uid)db.ref('bans/'+uid).remove().then(()=>alert(`Ban lifted for ${e}.`))}) });
+adminViewBansBtn.addEventListener('click', () => { db.ref('bans').once('value').then(s=>{if(!s.exists())return alert("No bans.");let l="Bans:\n\n";s.forEach(c=>{const b=c.val(),x=new Date(b.banUntil).toLocaleString();l+=`Email:${b.email}\nReason:${b.reason}\nExpires:${x}\n\n`});alert(l)}) });
 
-const findUserByEmail = (email, callback) => {
-    db.ref('users').orderByChild('email').equalTo(email).once('value').then(snapshot => {
-        if (snapshot.exists()) {
-            const uid = Object.keys(snapshot.val())[0];
-            callback(uid);
-        } else {
-            alert("Error: User with that email not found in database.");
-            callback(null);
-        }
-    });
-};
-
-adminBanBtn.addEventListener('click', () => {
-    const email = adminBanEmailInput.value.trim();
-    const durationHours = parseFloat(adminBanDurationInput.value);
-    const reason = adminBanReasonInput.value.trim() || "No reason provided.";
-    if (!email || isNaN(durationHours) || durationHours <= 0) return alert("Please enter a valid email and a positive number for duration.");
-
-    findUserByEmail(email, uid => {
-        if (uid) {
-            const banUntil = Date.now() + (durationHours * 60 * 60 * 1000);
-            db.ref('bans/' + uid).set({ email, reason, banUntil, bannedBy: currentUser.email })
-                .then(() => alert(`User ${email} has been banned for ${durationHours} hours.`));
-        }
-    });
-});
-
-adminUnbanBtn.addEventListener('click', () => {
-    const email = adminUnbanEmailInput.value.trim();
-    if (!email) return alert("Please enter an email to unban.");
-    findUserByEmail(email, uid => {
-        if (uid) db.ref('bans/' + uid).remove().then(() => alert(`Ban lifted for user ${email}.`));
-    });
-});
-
-adminViewBansBtn.addEventListener('click', () => {
-    db.ref('bans').once('value').then(snapshot => {
-        if (!snapshot.exists()) return alert("No users are currently banned.");
-        let banList = "Banned Users:\n\n";
-        snapshot.forEach(childSnapshot => {
-            const ban = childSnapshot.val();
-            const expiry = new Date(ban.banUntil).toLocaleString();
-            banList += `Email: ${ban.email}\nReason: ${ban.reason}\nExpires: ${expiry}\n\n`;
-        });
-        alert(banList);
-    });
-});
 
 auth.onAuthStateChanged(user => {
+    // Call our new UI reset function immediately.
+    resetUIState(!!user);
+
     if (user) {
         currentUser = { uid: user.uid, email: user.email };
-        if (user.email === 'admin@gmail.com') adminPanelButton.classList.remove('hidden');
+        // Now, check if admin and show the button if needed.
+        if (user.email === 'admin@gmail.com') {
+            adminPanelButton.classList.remove('hidden');
+        }
         listenForConfigChanges();
         db.ref('users/' + user.uid).once('value').then(snapshot => {
             if (snapshot.exists()) {
                 currentUser.username = snapshot.val().username;
-                loginPage.classList.add('hidden'); chatPage.classList.remove('hidden');
                 userDisplayName.textContent = currentUser.username;
                 listenForMessages();
             } else { auth.signOut(); }
         });
     } else {
-        loginPage.classList.remove('hidden'); chatPage.classList.add('hidden');
-        adminPanelButton.classList.add('hidden'); adminPanel.classList.add('hidden');
         currentUser = { uid: null, username: null, email: null };
         if (messagesListener) db.ref('messages').off('child_added', messagesListener);
         if (configListener) db.ref('config').off('value', configListener);
     }
 });
 
-// =================================================================================
-// SECTION 4: DATABASE & CHAT LOGIC
-// =================================================================================
+// --- DATABASE & CHAT LOGIC (No changes here) ---
 function listenForConfigChanges() { configListener = db.ref('config').on('value', s => { config = s.val() || {} }) }
 sendButton.addEventListener('click', () => {
     let msgTxt = messageInput.value.trim();
